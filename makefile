@@ -8,6 +8,5 @@ all:
 	gcc -o bin/Hello main.o
 	#------------------------------------------
 	./bin/Hello
-
 clean:
 	rm main.o
