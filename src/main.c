@@ -16,6 +16,17 @@ do { \
 	} \
 } while (0)
 
+void copy(int src, int dst, off_t size)
+{
+	char buf[1024];
+	int nbytes;
+
+	while (((nbytes = read(src, buf, 128)) > 0) && size > 0) {
+		write(dst, buf, nbytes);
+		size -= nbytes;
+	}
+}
+
 void error_msg(void)
 { printf("Wrong usage.\nTry \"dar help\" for a detailed description\n"); }
 
@@ -46,7 +57,7 @@ void pack_arch(int arch, char *path)
 	char *ppref;
 
 
-	//Analising the path
+	//Analysing the path
 	HANDLE_ERROR(stat(path, &check), -1);
 	// if (stat(path, &check) == -1) {
 	//	perror(path);
@@ -89,6 +100,10 @@ void pack_arch(int arch, char *path)
 		//Is sizeof(off_t) constant?
 		write(arch, &check.st_size, sizeof(off_t));
 		//Copy file to arch
+		file = open(path, O_RDONLY);
+		HANDLE_ERROR(file, -1);
+		copy(file, arch, check.st_size);
+		close(file);
 	}
 }
 
