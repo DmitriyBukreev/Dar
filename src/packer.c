@@ -37,17 +37,20 @@ void unpack_arch(int arch)
 {
 	char adress[1024];
 	off_t size;
+	mode_t mode;
 	int file;
 
 
-	while (readline(arch, adress, 1024) != 0) {
+	while (readline(arch, adress, 1024) > 0) {
 		if (adress[strlen(adress)-1] == '/') {
 			printf("Unpacking folder: %s\n", adress);
-			mkdir(adress, 0777);
+			HANDLE_ERROR(read(arch, &mode, sizeof(mode_t)), -1);
+			mkdir(adress, mode);
 		} else {
 			printf("Unpacking file:   %s\n", adress);
 			HANDLE_ERROR(read(arch, &size, sizeof(off_t)), -1);
-			file = creat(adress, 0777);
+			HANDLE_ERROR(read(arch, &mode, sizeof(mode_t)), -1);
+			file = creat(adress, mode);
 			HANDLE_ERROR(file, -1);
 			copy(arch, file, size);
 			close(file);
@@ -87,6 +90,7 @@ void pack_arch(int arch, char *path)
 		}
 		printf("Packing folder: %s\n", prefix);
 		write(arch, prefix, strlen(prefix)+1);
+		write(arch, &check.st_mode, sizeof(mode_t));
 		cur_dir = opendir(path);
 		HANDLE_ERROR(cur_dir, NULL);
 		chdir(path);
@@ -113,6 +117,7 @@ void pack_arch(int arch, char *path)
 		write(arch, path, strlen(path)+1);
 		//Is sizeof(off_t) constant?
 		write(arch, &check.st_size, sizeof(off_t));
+		write(arch, &check.st_mode, sizeof(mode_t));
 		//Copy file to arch
 		file = open(path, O_RDONLY);
 		HANDLE_ERROR(file, -1);

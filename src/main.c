@@ -21,7 +21,7 @@ int main(int argn, char **argv)
 	if (argn == 2 && !strcmp(argv[1], "help"))
 		help_msg();
 	else if (argn > 3 && !strcmp(argv[1], "pack")) {
-		arch = creat(argv[2], 0777);
+		arch = creat(argv[2], 0666);
 		HANDLE_ERROR(arch, -1);
 		for (int n = argn - 1; n != 2; n--)
 			pack_arch(arch, argv[n]);
