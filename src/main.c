@@ -16,12 +16,17 @@ do { \
 	} \
 } while (0)
 
+
 void copy(int src, int dst, off_t size)
 {
 	char buf[1024];
 	int nbytes;
 
-	while (((nbytes = read(src, buf, 128)) > 0) && size > 0) {
+	while (size > 0) {
+		if (size < 1024)
+			nbytes = read(src, buf, size);
+		else
+			nbytes = read(src, buf, 1024);
 		write(dst, buf, nbytes);
 		size -= nbytes;
 	}
