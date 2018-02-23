@@ -1,12 +1,23 @@
-all:
+SRC = $(wildcard src/*.c)
+OBJ = $(SRC:src/%.c=%.o)
+CFLAGS = -fsanitize=address -c
+LDFLAGS = -fsanitize=address -o
+
+all: dar
+
+dar : precompiled.h.pch $(OBJ)
+	gcc $(LDFLAGS) bin/$@ $(OBJ)
 	#------------------------------------------
-	check/checkpatch.pl --no-tree -f src/main.c
+
+$(OBJ): $(SRC)
+	check/checkpatch.pl --no-tree -fix -f $(SRC)
 	#------------------------------------------
-	cppcheck src/main.c
+	cppcheck $(SRC)
 	#------------------------------------------
-	gcc -c src/main.c
-	gcc -o bin/Hello main.o
+	gcc $(CFLAGS) $(SRC)
 	#------------------------------------------
-	./bin/Hello
-clean:
-	rm main.o
+
+#Testing precompiled headers
+precompiled.h.pch: src/precompiled.h
+	gcc $< -o $@
+	#------------------------------------------
