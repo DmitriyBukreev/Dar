@@ -1,36 +1,4 @@
-#include <dirent.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
-
-#define HANDLE_ERROR(result, condition) \
-do { \
-	if ((result) == (condition)) { \
-		perror("Error"); \
-		exit(errno); \
-	} \
-} while (0)
-
-
-void copy(int src, int dst, off_t size)
-{
-	char buf[1024];
-	int nbytes;
-
-	while (size > 0) {
-		if (size < 1024)
-			nbytes = read(src, buf, size);
-		else
-			nbytes = read(src, buf, 1024);
-		write(dst, buf, nbytes);
-		size -= nbytes;
-	}
-}
+#include "packer.h"
 
 void error_msg(void)
 { printf("Wrong usage.\nTry \"dar help\" for a detailed description\n"); }
@@ -46,72 +14,6 @@ void help_msg(void)
 		"\tdar help \t\t\t\t - shows this info\n");
 }
 
-void pack_arch(int arch, char *path)
-{
-	//Info about file
-	struct stat check;
-	//Pointer to directory (c) Captain Obvious
-	DIR *cur_dir;
-	//Info about file in the directory
-	struct dirent *entry;
-	//Part of the path to be written into archive
-	static char prefix[1024];
-	//It's length ^
-	int len;
-	//Pointer used to edit the prefix
-	char *ppref;
-
-
-	//Analysing the path
-	HANDLE_ERROR(stat(path, &check), -1);
-	// if (stat(path, &check) == -1) {
-	//	perror(path);
-	//	exit(errno);
-	// }
-
-	if (S_ISDIR(check.st_mode)) {
-		//Writing down the adress
-		strcat(prefix, path);
-		len = strlen(prefix);
-		//User can enter "path/" or "path"
-		if (prefix[len-1] != '/') {
-			prefix[len] = '/';
-			prefix[len+1] = 0;
-		}
-		printf("Processing folder\t%s\n", prefix);
-		write(arch, prefix, strlen(prefix)+1);
-		cur_dir = opendir(path);
-		HANDLE_ERROR(cur_dir, NULL);
-		chdir(path);
-		while ((entry = readdir(cur_dir)) != NULL) {
-			if (strcmp(".", entry->d_name) == 0
-				|| strcmp("..", entry->d_name) == 0)
-				continue;
-			pack_arch(arch, entry->d_name);
-		}
-		chdir("..");
-		//Making sure there's no '/' in the end of the line
-		prefix[strlen(prefix)-1] = 0;
-		//Searching from the end for '/'
-		//and removing the rest of the line
-		ppref = strrchr(prefix, '/');
-		if (ppref != NULL)
-			*(ppref+1) = 0;
-		closedir(cur_dir);
-	} else if (S_ISREG(check.st_mode)) {
-		printf("Processing file\t\t%s%s\n", prefix, path);
-		write(arch, prefix, strlen(prefix));
-		write(arch, path, strlen(path)+1);
-		//Is sizeof(off_t) constant?
-		write(arch, &check.st_size, sizeof(off_t));
-		//Copy file to arch
-		file = open(path, O_RDONLY);
-		HANDLE_ERROR(file, -1);
-		copy(file, arch, check.st_size);
-		close(file);
-	}
-}
-
 int main(int argn, char **argv)
 {
 	int arch;
@@ -121,10 +23,14 @@ int main(int argn, char **argv)
 	else if (argn > 3 && !strcmp(argv[1], "pack")) {
 		arch = creat(argv[2], 0777);
 		HANDLE_ERROR(arch, -1);
+		pack_arch(arch, argv[3]);
 		close(arch);
-	} else if (argn == 3 && !strcmp(argv[1], "unpack"))
-		printf("Unpacking file\n");
-	else
+	} else if (argn == 3 && !strcmp(argv[1], "unpack")) {
+		arch = open(argv[2], O_RDONLY);
+		HANDLE_ERROR(arch, -1);
+		unpack_arch(arch);
+		close(arch);
+	} else
 		error_msg();
 	return 0;
 }
