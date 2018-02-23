@@ -75,10 +75,6 @@ void pack_arch(int arch, char *path)
 
 	//Analysing the path
 	HANDLE_ERROR(stat(path, &check), -1);
-	// if (stat(path, &check) == -1) {
-	//	perror(path);
-	//	exit(errno);
-	// }
 
 	if (S_ISDIR(check.st_mode)) {
 		//Writing down the adress
@@ -108,6 +104,8 @@ void pack_arch(int arch, char *path)
 		ppref = strrchr(prefix, '/');
 		if (ppref != NULL)
 			*(ppref+1) = 0;
+		else
+			prefix[0] = 0;
 		closedir(cur_dir);
 	} else if (S_ISREG(check.st_mode)) {
 		printf("Packing file:\t%s%s\n", prefix, path);

@@ -3,9 +3,9 @@ OBJ = $(SRC:src/%.c=%.o)
 CFLAGS = -fsanitize=address -c
 LDFLAGS = -fsanitize=address -o
 
-all: dar
+all: var
 
-dar : precompiled.h.pch $(OBJ)
+var : precompiled.h.pch $(OBJ)
 	gcc $(LDFLAGS) bin/$@ $(OBJ)
 	#------------------------------------------
 

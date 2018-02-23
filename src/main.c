@@ -6,7 +6,7 @@ void error_msg(void)
 void help_msg(void)
 {
 	printf("%s%s%s%s%s%s\n",
-		"\"Disk ARchive\" (dar) is used for collecting many files",
+		"\"Virtual ARchive\" (var) is used for collecting many files",
 		" into one archive file and restoring them back\n",
 		"\tdar pack file file1 [file2 [..]] \t",
 		" - collects files file1, file2, etc. into file\n",
@@ -23,7 +23,8 @@ int main(int argn, char **argv)
 	else if (argn > 3 && !strcmp(argv[1], "pack")) {
 		arch = creat(argv[2], 0777);
 		HANDLE_ERROR(arch, -1);
-		pack_arch(arch, argv[3]);
+		for (int n = argn - 1; n != 2; n--)
+			pack_arch(arch, argv[n]);
 		close(arch);
 	} else if (argn == 3 && !strcmp(argv[1], "unpack")) {
 		arch = open(argv[2], O_RDONLY);
