@@ -13,7 +13,7 @@ var : precompiled.h.pch $(OBJ)
 	#------------------------------------------
 
 $(OBJ): obj/%.o: src/%.c
-	check/checkpatch.pl --no-tree -fix -f $^
+	check/checkpatch.pl --no-tree -f $^
 	#------------------------------------------
 	cppcheck $^
 	#------------------------------------------
