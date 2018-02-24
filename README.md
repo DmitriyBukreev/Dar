@@ -8,7 +8,7 @@ Check the coding style with `checkpatch.pl` script, which can be obtained at <ht
 
 ## Result
 Virtual ARchive (var) is able to process following instructions:
-* Packing files into archive `dar pack file file1 [file2 [...]]`
-* Appending files to archive `dar append file file1 [file2 [...]]`
-* Unpacking files from the archive `dar unpack file [path]`
-* Getting help `dar help`
+* Packing files into archive `var pack file file1 [file2 [...]]`
+* Appending files to archive `var append file file1 [file2 [...]]`
+* Unpacking files from the archive `var unpack file [path]`
+* Getting help `var help`
