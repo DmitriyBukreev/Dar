@@ -18,18 +18,16 @@ void copy(int src, int dst, off_t size)
 //Required for reading adresses
 int readline(int src, char *dst, int length)
 {
-	//Pointer to current position in the line
-	char *cur = dst;
 	char c;
 	int res;
 
 	//Reading byte by byte until meeting the error,
 	//or reading zero or length becomes zero
 	while (((res = read(src, &c, 1)) != -1) && c && length--) {
-		*(cur) = c;
-		cur++;
+		*(dst) = c;
+		dst++;
 	}
-	*(cur) = 0;
+	*(dst) = 0;
 	return res;
 }
 
